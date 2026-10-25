@@ -1,0 +1,10 @@
+# Reports can contain real secrets from the apps you scan. Never commit them.
+secrets_findings.txt
+urls_found.txt
+report*.txt
+*.html
+!sample_report.html
+
+# Apps and extracted files
+*.apk
+*.ipa

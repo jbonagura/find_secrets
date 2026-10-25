@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hardcoded Secrets Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#031B26; --surface:#01161E; --surface2:#063348; --border:#0a4a63;
+    --teal:#004E63; --teal-lt:#006b87; --red:#D32027; --red-dk:#a81820;
+    --orange:#e07b00; --green:#00a878;
+    --text:#cdd9e0; --text-dim:#7a9aaa; --muted:#3d6070;
+    --hot:rgba(211,32,39,.08); --radius:5px;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Lato',system-ui,-apple-system,"Segoe UI",sans-serif; font-size:13px; line-height:1.6; min-height:100vh; }
+  a { color:var(--teal-lt); text-decoration:none; transition:color .15s; }
+  a:hover { color:#fff; text-decoration:underline; }
+  code, .mono { font-family:'Share Tech Mono',ui-monospace,Menlo,Consolas,monospace; }
+
+  /* header */
+  .header { background:linear-gradient(160deg,#020f18 0%,var(--teal) 100%); border-bottom:3px solid var(--red); padding:36px 48px 28px; position:relative; overflow:hidden; }
+  .header::before { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,78,99,.15) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,78,99,.15) 40px); pointer-events:none; }
+  .header::after { content:""; position:absolute; right:-60px; top:-60px; width:320px; height:320px; border-radius:50%; background:radial-gradient(circle,rgba(211,32,39,.18) 0%,transparent 70%); pointer-events:none; }
+  .header-inner { position:relative; z-index:1; }
+  .logo { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:8px; font-family:'Share Tech Mono',monospace; }
+  h1 { font-size:42px; font-weight:900; color:#fff; letter-spacing:-1px; line-height:1; text-transform:uppercase; }
+  h1 .red { color:var(--red); }
+  .subtitle { font-size:12px; color:rgba(255,255,255,.45); margin-top:8px; font-family:'Share Tech Mono',monospace; letter-spacing:.04em; }
+  .subtitle a { color:rgba(255,255,255,.65); border-bottom:1px solid rgba(255,255,255,.2); padding-bottom:1px; }
+  .subtitle a:hover { color:#fff; border-color:#fff; text-decoration:none; }
+
+  /* attention panel */
+  .alert { margin:0 48px 8px; border:1px solid var(--border); border-left:5px solid var(--muted); border-radius:var(--radius); background:var(--surface); padding:16px 20px; }
+  .alert-danger { border-left-color:var(--red); background:linear-gradient(90deg,rgba(211,32,39,.14),var(--surface) 55%); border-color:rgba(211,32,39,.5); }
+  .alert-warn   { border-left-color:var(--orange); background:linear-gradient(90deg,rgba(224,123,0,.12),var(--surface) 55%); }
+  .alert-ok     { border-left-color:var(--green); background:linear-gradient(90deg,rgba(0,168,120,.12),var(--surface) 55%); }
+  .alert-title { font-size:15px; font-weight:900; color:#fff; letter-spacing:.02em; text-transform:uppercase; }
+  .alert-sub { color:var(--text-dim); font-size:12px; margin-top:2px; }
+  .alert-list { list-style:none; margin-top:12px; }
+  .alert-item { padding:8px 0; border-top:1px solid rgba(10,74,99,.6); }
+  .alert-item strong { color:#fff; margin:0 8px 0 6px; }
+  .alert-origin { color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:11px; }
+  .alert-match { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text); margin-top:3px; word-break:break-all; }
+  .alert-more { margin-top:8px; color:var(--text-dim); font-size:12px; }
+
+  /* stat cards */
+  .stats { display:flex; gap:16px; padding:24px 48px; flex-wrap:wrap; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 24px; min-width:140px; flex:1; position:relative; overflow:hidden; }
+  .stat-card::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--border); }
+  .stat-card.teal::before { background:var(--teal-lt); }
+  .stat-card.danger::before { background:var(--red); }
+  .stat-card.warn::before { background:var(--orange); }
+  .stat-card.neutral::before { background:var(--muted); }
+  .stat-label { font-size:10px; text-transform:uppercase; letter-spacing:.18em; color:var(--text-dim); font-weight:700; }
+  .stat-value { font-size:46px; font-weight:900; color:#fff; line-height:1; margin-top:6px; letter-spacing:-2px; }
+  .stat-card.teal .stat-value { color:var(--teal-lt); }
+  .stat-card.danger .stat-value { color:var(--red); }
+  .stat-card.warn .stat-value { color:var(--orange); }
+
+  /* section titles + toolbar */
+  .sec-title { padding:8px 48px 10px; font-size:12px; font-weight:900; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-lt); }
+  .sec-note { padding:0 48px 10px; color:var(--text-dim); font-size:12px; }
+  .toolbar { padding:0 48px 18px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--border); }
+  .filter-btn { background:var(--surface); border:1px solid var(--border); color:var(--text-dim); padding:6px 16px; border-radius:20px; cursor:pointer; font-size:11px; font-family:'Lato',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase; transition:all .15s; }
+  .filter-btn:hover { border-color:var(--teal-lt); color:#fff; }
+  .filter-btn.active { background:var(--teal); border-color:var(--teal-lt); color:#fff; }
+  .filter-btn.active-danger { background:var(--red-dk); border-color:var(--red); color:#fff; }
+  #search { margin-left:auto; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:var(--radius); font-size:12px; font-family:'Lato',sans-serif; width:260px; outline:none; transition:border .15s; }
+  #search:focus { border-color:var(--teal-lt); }
+  #search::placeholder { color:var(--muted); }
+
+  /* findings table */
+  .table-wrap { padding:16px 48px 24px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead tr { background:var(--surface2); border-bottom:2px solid var(--teal); }
+  th { padding:11px 12px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--teal-lt); font-weight:700; white-space:nowrap; }
+  td { padding:10px 12px; border-bottom:1px solid rgba(10,74,99,.5); vertical-align:top; }
+  tr:hover td { background:rgba(0,78,99,.12); }
+  .row-hot td { background:var(--hot); }
+  .row-hot:hover td { background:rgba(211,32,39,.14); }
+  .td-mono { font-family:'Share Tech Mono',monospace; color:var(--text-dim); font-size:11px; word-break:break-all; max-width:240px; }
+  .td-match { font-family:'Share Tech Mono',monospace; font-size:11px; word-break:break-all; color:var(--text); }
+  tr.hidden, details.hidden { display:none; }
+  .empty { padding:18px 48px; color:var(--text-dim); font-style:italic; }
+
+  /* severity badges */
+  .sev { display:inline-block; padding:2px 9px; border-radius:3px; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+  .sev-critical { background:var(--red); color:#fff; }
+  .sev-high { background:rgba(211,32,39,.22); color:#f07070; border:1px solid rgba(211,32,39,.45); }
+  .sev-medium { background:rgba(224,123,0,.18); color:var(--orange); border:1px solid rgba(224,123,0,.4); }
+  .sev-low { background:rgba(61,96,112,.35); color:var(--text-dim); }
+
+  /* hosts */
+  .hosts { padding:12px 48px 48px; }
+  details.group { margin:8px 48px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+  details.group > summary { cursor:pointer; padding:12px 16px; display:flex; align-items:center; gap:12px; list-style:none; }
+  details.group > summary::-webkit-details-marker { display:none; }
+  .gtoggle { width:22px; height:22px; flex:none; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:4px; background:var(--surface2); color:var(--teal-lt); font:700 15px/1 'Share Tech Mono',monospace; }
+  .gtoggle::before { content:"+"; }
+  details.group[open] > summary .gtoggle::before { content:"\2212"; }
+  details.group > summary:hover .gtoggle { border-color:var(--teal-lt); color:#fff; }
+  details.more { display:block; margin-top:4px; }
+  details.more > summary { cursor:pointer; display:inline-block; list-style:none; font-size:11px; font-weight:700; color:var(--teal-lt); border:1px solid var(--border); border-radius:999px; padding:1px 10px; }
+  details.more > summary::-webkit-details-marker { display:none; }
+  details.more > summary:hover { color:#fff; border-color:var(--teal-lt); }
+  details.more .m-open { display:none; }
+  details.more[open] .m-open { display:inline; }
+  details.more[open] .m-closed { display:none; }
+  details.more[open] > summary { margin-bottom:6px; }
+  details.more.more-block { margin-top:10px; }
+  .group-title { font-size:12px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--teal-lt); }
+  details.group .table-wrap { padding:0 16px 16px; }
+  details.group .sec-note, details.group .empty { padding-left:16px; padding-right:16px; }
+  .hosts-inner { padding:4px 16px 16px; }
+  .host-search { display:block; width:100%; max-width:320px; margin:0 0 8px; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:var(--radius); font-size:12px; font-family:'Lato',sans-serif; outline:none; }
+  .host-search:focus { border-color:var(--teal-lt); }
+  .host-search::placeholder { color:var(--muted); }
+  details.host { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin:6px 0; padding:8px 14px; }
+  details.host[open] { border-color:var(--teal-lt); }
+  details.host summary { cursor:pointer; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  details.host summary a { font-family:'Share Tech Mono',monospace; color:#fff; font-size:12px; }
+  .badge { font-size:10px; font-weight:700; padding:2px 9px; border-radius:999px; border:1px solid var(--border); background:var(--surface2); color:var(--text-dim); }
+  .url { margin:10px 0 0 4px; }
+  .url a { font-family:'Share Tech Mono',monospace; font-size:11px; word-break:break-all; }
+  .url ul { margin:4px 0 0; padding-left:22px; color:var(--text-dim); font-size:11px; font-family:'Share Tech Mono',monospace; }
+
+  .footer { text-align:center; padding:24px 48px; font-size:11px; color:var(--muted); letter-spacing:.04em; border-top:1px solid var(--border); }
+  .footer a { color:var(--text-dim); border-bottom:1px solid var(--muted); padding-bottom:1px; }
+  @media (max-width:700px) { .header,.stats,.alert,.table-wrap,.hosts,.toolbar,.sec-title,.sec-note,details.group { padding-left:18px; padding-right:18px; margin-left:0; margin-right:0; } .alert { margin:0 18px 8px; } h1 { font-size:30px; } #search { width:100%; margin-left:0; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">&#9632; Secure Ideas · Professionally Evil</div>
+    <h1>Hardcoded <span class="red">Secrets</span> Scanner</h1>
+    <div class="subtitle">Mobile Binary Secrets &amp; Endpoint Report &nbsp;·&nbsp; <span>sample-app.apk</span> &nbsp;·&nbsp; Sun Oct 25 18:09:14 UTC 2026 &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/jordan-bonagura" target="_blank" rel="noopener noreferrer">Jordan Bonagura</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.secureideas.com" target="_blank" rel="noopener noreferrer">Secure Ideas - Professionally Evil</a>
+    </div>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat-card danger"><div class="stat-label">Critical</div><div class="stat-value">1</div></div>
+  <div class="stat-card danger"><div class="stat-label">High</div><div class="stat-value">4</div></div>
+  <div class="stat-card warn"><div class="stat-label">Medium</div><div class="stat-value">5</div></div>
+  <div class="stat-card neutral"><div class="stat-label">Low</div><div class="stat-value">5</div></div>
+</div>
+<div class="alert alert-danger"><div class="alert-title">&#9888; Needs attention</div>
+<div class="alert-sub">1 critical &middot; 4 high &middot; 5 medium &middot; 5 low &mdash; worst first</div>
+<ul class="alert-list">
+<li class="alert-item"><span class="sev sev-critical">CRITICAL</span><strong>Possible real private key</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">-----BEGIN RSA PRIVATE KEY-----  &lt;-- [WARNING: long base64 body after marker - may be a real key, extract and validate with openssl]</div></li>
+<li class="alert-item"><span class="sev sev-high">HIGH</span><strong>AWS access key ID</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">aws_access_key = AKIAIOSFODNN7EXAMPLE</div></li>
+<li class="alert-item"><span class="sev sev-high">HIGH</span><strong>Credentials embedded in URL</strong><div class="alert-origin">assets/config.json</div><div class="alert-match"><a href="https://admin:Demo-Pass-1234@db.internal.example.com/prod" target="_blank" rel="noopener noreferrer">https://admin:Demo-Pass-1234@db.internal.example.com/prod</a></div></li>
+<li class="alert-item"><span class="sev sev-high">HIGH</span><strong>JWT carrying a secret-like claim</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhY2VudGVyIjoiZXUxIiwia2V5IjoiRVhBTVBMRS1TREstS0VZLTAwMDAifQ.HZPvaMl79YuV6JRHKz03VPEhz0k5b0ggefcP2MKAAyIjjI2a4p265U1q4Xzz_XgA2RogmNHGVUlLTuarGROAMA  &lt;-- [JWT alg=RS256, claims: datacenter,key, payload: {"datacenter":"eu1","key":"EXAMPLE-SDK-KEY-0000"}]</div></li>
+<li class="alert-item"><span class="sev sev-high">HIGH</span><strong>Secret-like assignment</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">"client_secret": "Demo-Secret-1234567",</div></li>
+<li class="alert-item"><span class="sev sev-medium">MEDIUM</span><strong>Cleartext HTTP endpoint x2</strong><div class="alert-origin">assets/config.json</div><div class="alert-match"><a href="http://10.0.0.5:8080/internal/health" target="_blank" rel="noopener noreferrer">http://10.0.0.5:8080/internal/health</a><br><a href="http://staging.example.com/api/v2" target="_blank" rel="noopener noreferrer">http://staging.example.com/api/v2</a></div></li>
+<li class="alert-item"><span class="sev sev-medium">MEDIUM</span><strong>Internal/private address</strong><div class="alert-origin">assets/config.json</div><div class="alert-match"><a href="http://10.0.0.5:8080/internal/health" target="_blank" rel="noopener noreferrer">http://10.0.0.5:8080/internal/health</a></div></li>
+<li class="alert-item"><span class="sev sev-medium">MEDIUM</span><strong>JWT</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJhdXRoLmV4YW1wbGUuY29tIiwic2NvcGUiOiJyZWFkIn0.Vc82L936-VMNFsAb8niye1gSsxzXeOfrnlRCTwvUrfXGkat8zj5dHIQpSpsQokD4CoyYFCks2WAQ9Yn9xOpnrw  &lt;-- [JWT alg=RS256, claims: iss,scope,sub, payload: {"sub":"demo-user","iss":"auth.example.com","scope":"read"}]</div></li>
+<li class="alert-item"><span class="sev sev-medium">MEDIUM</span><strong>Non-production or internal-looking host x2</strong><div class="alert-origin">assets/config.json</div><div class="alert-match"><a href="http://staging.example.com/api/v2" target="_blank" rel="noopener noreferrer">http://staging.example.com/api/v2</a><br><a href="https://admin:Demo-Pass-1234@db.internal.example.com/prod" target="_blank" rel="noopener noreferrer">https://admin:Demo-Pass-1234@db.internal.example.com/prod</a></div></li>
+<li class="alert-item"><span class="sev sev-medium">MEDIUM</span><strong>Secret-like assignment</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">api_key = "demo1234abcd5678"</div></li>
+</ul>
+<details class="more more-block"><summary><span class="m-closed">+ 5 more</span><span class="m-open">&minus; less</span></summary><ul class="alert-list">
+<li class="alert-item"><span class="sev sev-low">LOW</span><strong>JWT (expired)</strong><div class="alert-origin">assets/config.json</div><div class="alert-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJleHAiOjE2MDAwMDAwMDB9.7WhnVEQKkH9U75ZhF59CDmEC3SSAjMayuIzDdYbX9xHwu1kvIZE3Ifp-IMDtjVMoi6i8pRc9ISJgNfszLHbhsg  &lt;-- [JWT alg=RS256, claims: exp,sub, payload: {"sub":"demo-user","exp":1600000000}, EXPIRED]</div></li>
+<li class="alert-item"><span class="sev sev-low">LOW</span><strong>Keyword inside app package</strong><div class="alert-origin">classes.dex</div><div class="alert-match">Lcom/example/sampleapp/auth/TokenStore;</div></li>
+<li class="alert-item"><span class="sev sev-low">LOW</span><strong>Keyword inside app package</strong><div class="alert-origin">classes.dex</div><div class="alert-match">Lcom/example/sampleapp/net/ApiKeys;</div></li>
+<li class="alert-item"><span class="sev sev-low">LOW</span><strong>Private key marker (TLS library constant) x3</strong><div class="alert-origin">lib/*/libsecurity-sdk.so</div><div class="alert-match">-----BEGIN EC PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]<br>-----BEGIN PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]<br>-----BEGIN RSA PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]</div></li>
+<li class="alert-item"><span class="sev sev-low">LOW</span><strong>Signed JWS with certificate chain (not a credential) x4</strong><div class="alert-origin">assets/policies/policy_4.jws<br>assets/policies/policy_1.jws<details class="more"><summary><span class="m-closed">+ 2 more</span><span class="m-open">&minus; less</span></summary>assets/policies/policy_2.jws<br>assets/policies/policy_3.jws</details></div><div class="alert-match">eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDA0LCJ4NWMiOlsicnE5...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]<br>eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAxLCJ4NWMiOlsiMXhu...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]<br>eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAyLCJ4NWMiOlsiRFdm...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]<br>eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAzLCJ4NWMiOlsiRTBC...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]</div></li>
+</ul></details>
+</div>
+<div class="sec-title">All findings (merged, worst first)</div>
+<div class="toolbar">
+  <button class="filter-btn active" onclick="setSev('all',this)">All</button>
+  <button class="filter-btn" onclick="setSev('critical',this)">Critical</button>
+  <button class="filter-btn" onclick="setSev('high',this)">High</button>
+  <button class="filter-btn" onclick="setSev('medium',this)">Medium</button>
+  <button class="filter-btn" onclick="setSev('low',this)">Low</button>
+  <input id="search" type="text" placeholder="Search all findings…" oninput="setQuery(this.value)"/>
+</div>
+<div class="table-wrap">
+  <table id="findings">
+    <thead><tr><th>Severity</th><th>Category</th><th>Origin file</th><th>Match</th></tr></thead>
+    <tbody>
+<tr class="frow row-hot" data-sev="critical"><td><span class="sev sev-critical">CRITICAL</span></td><td>Possible real private key</td><td class="td-mono">assets/config.json</td><td class="td-match">-----BEGIN RSA PRIVATE KEY-----  &lt;-- [WARNING: long base64 body after marker - may be a real key, extract and validate with openssl]</td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td>AWS access key ID</td><td class="td-mono">assets/config.json</td><td class="td-match">aws_access_key = AKIAIOSFODNN7EXAMPLE</td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td>Credentials embedded in URL</td><td class="td-mono">assets/config.json</td><td class="td-match"><a href="https://admin:Demo-Pass-1234@db.internal.example.com/prod" target="_blank" rel="noopener noreferrer">https://admin:Demo-Pass-1234@db.internal.example.com/prod</a></td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td>JWT carrying a secret-like claim</td><td class="td-mono">assets/config.json</td><td class="td-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhY2VudGVyIjoiZXUxIiwia2V5IjoiRVhBTVBMRS1TREstS0VZLTAwMDAifQ.HZPvaMl79YuV6JRHKz03VPEhz0k5b0ggefcP2MKAAyIjjI2a4p265U1q4Xzz_XgA2RogmNHGVUlLTuarGROAMA  &lt;-- [JWT alg=RS256, claims: datacenter,key, payload: {"datacenter":"eu1","key":"EXAMPLE-SDK-KEY-0000"}]</td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td>Secret-like assignment</td><td class="td-mono">assets/config.json</td><td class="td-match">"client_secret": "Demo-Secret-1234567",</td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td>Cleartext HTTP endpoint x2</td><td class="td-mono">assets/config.json</td><td class="td-match"><a href="http://10.0.0.5:8080/internal/health" target="_blank" rel="noopener noreferrer">http://10.0.0.5:8080/internal/health</a><br><a href="http://staging.example.com/api/v2" target="_blank" rel="noopener noreferrer">http://staging.example.com/api/v2</a></td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td>Internal/private address</td><td class="td-mono">assets/config.json</td><td class="td-match"><a href="http://10.0.0.5:8080/internal/health" target="_blank" rel="noopener noreferrer">http://10.0.0.5:8080/internal/health</a></td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td>JWT</td><td class="td-mono">assets/config.json</td><td class="td-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJhdXRoLmV4YW1wbGUuY29tIiwic2NvcGUiOiJyZWFkIn0.Vc82L936-VMNFsAb8niye1gSsxzXeOfrnlRCTwvUrfXGkat8zj5dHIQpSpsQokD4CoyYFCks2WAQ9Yn9xOpnrw  &lt;-- [JWT alg=RS256, claims: iss,scope,sub, payload: {"sub":"demo-user","iss":"auth.example.com","scope":"read"}]</td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td>Non-production or internal-looking host x2</td><td class="td-mono">assets/config.json</td><td class="td-match"><a href="http://staging.example.com/api/v2" target="_blank" rel="noopener noreferrer">http://staging.example.com/api/v2</a><br><a href="https://admin:Demo-Pass-1234@db.internal.example.com/prod" target="_blank" rel="noopener noreferrer">https://admin:Demo-Pass-1234@db.internal.example.com/prod</a></td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td>Secret-like assignment</td><td class="td-mono">assets/config.json</td><td class="td-match">api_key = "demo1234abcd5678"</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>JWT (expired)</td><td class="td-mono">assets/config.json</td><td class="td-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJleHAiOjE2MDAwMDAwMDB9.7WhnVEQKkH9U75ZhF59CDmEC3SSAjMayuIzDdYbX9xHwu1kvIZE3Ifp-IMDtjVMoi6i8pRc9ISJgNfszLHbhsg  &lt;-- [JWT alg=RS256, claims: exp,sub, payload: {"sub":"demo-user","exp":1600000000}, EXPIRED]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Keyword inside app package</td><td class="td-mono">classes.dex</td><td class="td-match">Lcom/example/sampleapp/auth/TokenStore;</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Keyword inside app package</td><td class="td-mono">classes.dex</td><td class="td-match">Lcom/example/sampleapp/net/ApiKeys;</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Private key marker (TLS library constant) x3</td><td class="td-mono">lib/*/libsecurity-sdk.so</td><td class="td-match">-----BEGIN EC PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]<br>-----BEGIN PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]<br>-----BEGIN RSA PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Signed JWS with certificate chain (not a credential) x4</td><td class="td-mono">assets/policies/policy_4.jws<br>assets/policies/policy_1.jws<br>assets/policies/policy_2.jws<details class="more"><summary><span class="m-closed">+ 1 more</span><span class="m-open">&minus; less</span></summary>assets/policies/policy_3.jws</details></td><td class="td-match">eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDA0LCJ4NWMiOlsicnE5...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]<br>eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAxLCJ4NWMiOlsiMXhu...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]<br>eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAyLCJ4NWMiOlsiRFdm...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]<br>eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAzLCJ4NWMiOlsiRTBC...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]</td></tr>
+    </tbody></table></div>
+<div id="no-match" class="empty" style="display:none">No findings match this filter. Click <strong>All</strong> to see everything.</div>
+<div class="sec-title">Findings by group</div>
+<details class="group" id="g0"><summary><span class="gtoggle"></span><span class="group-title">0. Hits inside the app's own package (com.example.sampleapp)</span> <span class="badge">2</span></summary>
+<div class="table-wrap"><table><thead><tr><th>Severity</th><th>Origin file</th><th>Match</th></tr></thead><tbody>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td class="td-mono">classes.dex</td><td class="td-match">Lcom/example/sampleapp/auth/TokenStore;</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td class="td-mono">classes.dex</td><td class="td-match">Lcom/example/sampleapp/net/ApiKeys;</td></tr>
+</tbody></table></div>
+</details>
+<details class="group" id="g1"><summary><span class="gtoggle"></span><span class="group-title">1. Keyword + assignment + value (8+ chars)</span> <span class="badge">3</span></summary>
+<div class="table-wrap"><table><thead><tr><th>Severity</th><th>Origin file</th><th>Match</th></tr></thead><tbody>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td class="td-mono">assets/config.json</td><td class="td-match">"client_secret": "Demo-Secret-1234567",</td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td class="td-mono">assets/config.json</td><td class="td-match">aws_access_key = AKIAIOSFODNN7EXAMPLE</td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td class="td-mono">assets/config.json</td><td class="td-match">api_key = "demo1234abcd5678"</td></tr>
+</tbody></table></div>
+</details>
+<details class="group" id="g2"><summary><span class="gtoggle"></span><span class="group-title">2. Known token formats</span> <span class="badge">12</span></summary>
+<div class="table-wrap"><table><thead><tr><th>Severity</th><th>Category</th><th>Origin file</th><th>Match</th></tr></thead><tbody>
+<tr class="frow row-hot" data-sev="critical"><td><span class="sev sev-critical">CRITICAL</span></td><td>Possible real private key</td><td class="td-mono">assets/config.json</td><td class="td-match">-----BEGIN RSA PRIVATE KEY-----  &lt;-- [WARNING: long base64 body after marker - may be a real key, extract and validate with openssl]</td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td>AWS access key ID</td><td class="td-mono">assets/config.json</td><td class="td-match">aws_access_key = AKIAIOSFODNN7EXAMPLE</td></tr>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td>JWT carrying a secret-like claim</td><td class="td-mono">assets/config.json</td><td class="td-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhY2VudGVyIjoiZXUxIiwia2V5IjoiRVhBTVBMRS1TREstS0VZLTAwMDAifQ.HZPvaMl79YuV6JRHKz03VPEhz0k5b0ggefcP2MKAAyIjjI2a4p265U1q4Xzz_XgA2RogmNHGVUlLTuarGROAMA  &lt;-- [JWT alg=RS256, claims: datacenter,key, payload: {"datacenter":"eu1","key":"EXAMPLE-SDK-KEY-0000"}]</td></tr>
+<tr class="frow" data-sev="medium"><td><span class="sev sev-medium">MEDIUM</span></td><td>JWT</td><td class="td-mono">assets/config.json</td><td class="td-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJhdXRoLmV4YW1wbGUuY29tIiwic2NvcGUiOiJyZWFkIn0.Vc82L936-VMNFsAb8niye1gSsxzXeOfrnlRCTwvUrfXGkat8zj5dHIQpSpsQokD4CoyYFCks2WAQ9Yn9xOpnrw  &lt;-- [JWT alg=RS256, claims: iss,scope,sub, payload: {"sub":"demo-user","iss":"auth.example.com","scope":"read"}]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Private key marker (TLS library constant)</td><td class="td-mono">lib/*/libsecurity-sdk.so</td><td class="td-match">-----BEGIN EC PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Private key marker (TLS library constant)</td><td class="td-mono">lib/*/libsecurity-sdk.so</td><td class="td-match">-----BEGIN PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Private key marker (TLS library constant)</td><td class="td-mono">lib/*/libsecurity-sdk.so</td><td class="td-match">-----BEGIN RSA PRIVATE KEY-----  &lt;-- [likely mbedTLS/PolarSSL constant, not a real key - confirm manually]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>JWT (expired)</td><td class="td-mono">assets/config.json</td><td class="td-match">eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJleHAiOjE2MDAwMDAwMDB9.7WhnVEQKkH9U75ZhF59CDmEC3SSAjMayuIzDdYbX9xHwu1kvIZE3Ifp-IMDtjVMoi6i8pRc9ISJgNfszLHbhsg  &lt;-- [JWT alg=RS256, claims: exp,sub, payload: {"sub":"demo-user","exp":1600000000}, EXPIRED]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Signed JWS with certificate chain (not a credential)</td><td class="td-mono">assets/policies/policy_4.jws</td><td class="td-match">eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDA0LCJ4NWMiOlsicnE5...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Signed JWS with certificate chain (not a credential)</td><td class="td-mono">assets/policies/policy_1.jws</td><td class="td-match">eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAxLCJ4NWMiOlsiMXhu...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Signed JWS with certificate chain (not a credential)</td><td class="td-mono">assets/policies/policy_2.jws</td><td class="td-match">eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAyLCJ4NWMiOlsiRFdm...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]</td></tr>
+<tr class="frow" data-sev="low"><td><span class="sev sev-low">LOW</span></td><td>Signed JWS with certificate chain (not a credential)</td><td class="td-mono">assets/policies/policy_3.jws</td><td class="td-match">eyJhbGciOiJSUzUxMiIsInRzIjoxNzAwMDAwMDAwMDAzLCJ4NWMiOlsiRTBC...[3387 chars]  &lt;-- [JWT alg=RS512, x5c certificate chain: signed JWS (policy/config), not a credential, claims: id,sub]</td></tr>
+</tbody></table></div>
+</details>
+<details class="group" id="g3"><summary><span class="gtoggle"></span><span class="group-title">3. URLs with embedded credentials (user:pass@host)</span> <span class="badge">1</span></summary>
+<div class="table-wrap"><table><thead><tr><th>Severity</th><th>Origin file</th><th>Match</th></tr></thead><tbody>
+<tr class="frow row-hot" data-sev="high"><td><span class="sev sev-high">HIGH</span></td><td class="td-mono">assets/config.json</td><td class="td-match"><a href="https://admin:Demo-Pass-1234@db.internal.example.com/prod" target="_blank" rel="noopener noreferrer">https://admin:Demo-Pass-1234@db.internal.example.com/prod</a></td></tr>
+</tbody></table></div>
+</details>
+<details class="group" id="g4"><summary><span class="gtoggle"></span><span class="group-title">4. Unique HTTP/HTTPS hosts (full URLs and files in urls_found.txt)</span> <span class="badge">9</span></summary>
+<div class="sec-note">Each URL appears once, with the files that contain it. Links open the live URL: only follow them for targets you are authorized to test.</div>
+<div class="hosts-inner"><input class="host-search" type="text" placeholder="Filter hosts / URLs / files…" oninput="filterHosts(this.value)"/>
+<details class="host"><summary><a href="http://10.0.0.5" target="_blank" rel="noopener noreferrer">http://10.0.0.5</a> <span class="badge">1 URL</span> <span class="sev sev-medium">Internal/private address</span><span class="sev sev-medium">Cleartext HTTP endpoint</span></summary>
+<div class="url"><a href="http://10.0.0.5:8080/internal/health" target="_blank" rel="noopener noreferrer">http://10.0.0.5:8080/internal/health</a><ul>
+<li>assets/config.json</li>
+</ul></div></details>
+<details class="host"><summary><a href="http://captive.apple.com" target="_blank" rel="noopener noreferrer">http://captive.apple.com</a> <span class="badge">1 URL</span> </summary>
+<div class="url"><a href="http://captive.apple.com/" target="_blank" rel="noopener noreferrer">http://captive.apple.com/</a><ul>
+<li>classes.dex</li>
+</ul></div></details>
+<details class="host"><summary><a href="http://staging.example.com" target="_blank" rel="noopener noreferrer">http://staging.example.com</a> <span class="badge">1 URL</span> <span class="sev sev-medium">Non-production or internal-looking host</span><span class="sev sev-medium">Cleartext HTTP endpoint</span></summary>
+<div class="url"><a href="http://staging.example.com/api/v2" target="_blank" rel="noopener noreferrer">http://staging.example.com/api/v2</a><ul>
+<li>assets/config.json</li>
+<li>res/xml/endpoints.txt</li>
+</ul></div></details>
+<details class="host"><summary><a href="https://api.example.com" target="_blank" rel="noopener noreferrer">https://api.example.com</a> <span class="badge">2 URLs</span> </summary>
+<div class="url"><a href="https://api.example.com/v1/login?client=android&amp;lang=en" target="_blank" rel="noopener noreferrer">https://api.example.com/v1/login?client=android&amp;lang=en</a><ul>
+<li>assets/config.json</li>
+<li>res/xml/endpoints.txt</li>
+</ul></div>
+<div class="url"><a href="https://api.example.com/v1/profile" target="_blank" rel="noopener noreferrer">https://api.example.com/v1/profile</a><ul>
+<li>assets/config.json</li>
+</ul></div></details>
+<details class="host"><summary><a href="https://cdn.example.org" target="_blank" rel="noopener noreferrer">https://cdn.example.org</a> <span class="badge">1 URL</span> </summary>
+<div class="url"><a href="https://cdn.example.org/static/app.js" target="_blank" rel="noopener noreferrer">https://cdn.example.org/static/app.js</a><ul>
+<li>assets/config.json</li>
+</ul></div></details>
+<details class="host"><summary><a href="https://db.internal.example.com" target="_blank" rel="noopener noreferrer">https://db.internal.example.com</a> <span class="badge">1 URL</span> <span class="sev sev-medium">Non-production or internal-looking host</span></summary>
+<div class="url"><a href="https://admin:Demo-Pass-1234@db.internal.example.com/prod" target="_blank" rel="noopener noreferrer">https://admin:Demo-Pass-1234@db.internal.example.com/prod</a><ul>
+<li>assets/config.json</li>
+</ul></div></details>
+<details class="host"><summary><a href="https://localhost" target="_blank" rel="noopener noreferrer">https://localhost</a> <span class="badge">1 URL</span> </summary>
+<div class="url"><a href="https://localhost/" target="_blank" rel="noopener noreferrer">https://localhost/</a><ul>
+<li>classes.dex</li>
+</ul></div></details>
+<details class="host"><summary><a href="https://sso.example.net" target="_blank" rel="noopener noreferrer">https://sso.example.net</a> <span class="badge">1 URL</span> </summary>
+<div class="url"><a href="https://sso.example.net/oauth/authorize" target="_blank" rel="noopener noreferrer">https://sso.example.net/oauth/authorize</a><ul>
+<li>assets/config.json</li>
+</ul></div></details>
+<details class="host"><summary><a href="https://telemetry.example.net" target="_blank" rel="noopener noreferrer">https://telemetry.example.net</a> <span class="badge">1 URL</span> </summary>
+<div class="url"><a href="https://telemetry.example.net/collect" target="_blank" rel="noopener noreferrer">https://telemetry.example.net/collect</a><ul>
+<li>res/xml/endpoints.txt</li>
+</ul></div></details>
+</div></details>
+<div class="footer">
+  Generated by find_secrets.sh &nbsp;&middot;&nbsp;
+  <a href="https://www.linkedin.com/in/jordan-bonagura" target="_blank" rel="noopener noreferrer">Jordan Bonagura</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://www.secureideas.com" target="_blank" rel="noopener noreferrer">Secure Ideas - Professionally Evil</a>
+</div>
+
+<script>
+  // Severity buttons + search act ONLY on the merged "All findings" table.
+  // The "Findings by group" tables always show every row (the badge count = rows shown).
+  let sevFilter = 'all', query = '';
+  function applyFilters() {
+    let visible = 0;
+    document.querySelectorAll('#findings tbody tr.frow').forEach(r => {
+      const okSev = sevFilter === 'all' || r.dataset.sev === sevFilter;
+      const okQ = !query || r.textContent.toLowerCase().includes(query);
+      const show = okSev && okQ;
+      r.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    const nm = document.getElementById('no-match');
+    if (nm) nm.style.display = visible === 0 ? 'block' : 'none';
+  }
+  function setSev(s, btn) {
+    sevFilter = s;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'active-danger'));
+    btn.classList.add(s === 'critical' || s === 'high' ? 'active-danger' : 'active');
+    applyFilters();
+  }
+  function setQuery(v) { query = v.toLowerCase(); applyFilters(); }
+  // Group 4 has its own small filter for hosts / URLs / files
+  function filterHosts(v) {
+    v = v.toLowerCase();
+    document.querySelectorAll('details.host').forEach(d => {
+      const hide = !!v && !d.textContent.toLowerCase().includes(v);
+      d.classList.toggle('hidden', hide);
+      if (v && !hide) d.open = true;
+    });
+  }
+</script>
+</body>
+</html>
