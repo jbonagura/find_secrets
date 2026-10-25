@@ -35,7 +35,7 @@ Developed and tested on Linux with `mawk`, `gawk` and the one-true-awk. macOS sh
 ## Quick start
 
 ```bash
-git clone https://github.com/<your-user>/finding_secrets.git
+git clone https://github.com/jbonagura/finding_secrets.git
 cd finding_secrets
 
 bash find_secrets.sh app.apk
@@ -117,7 +117,7 @@ https://api.example.com/v1/login?client=android&lang=en
     - res/xml/endpoints.txt
 ```
 
-A full HTML report built from a fictional app is in [`sample_report.html`](sample_report.html). Download it and open it in a browser, or preview it online: `https://htmlpreview.github.io/?https://github.com/<your-user>/finding_secrets/blob/main/sample_report.html`
+A full HTML report built from a fictional app is in [`sample_report.html`](sample_report.html). Download it and open it in a browser, or preview it online: `https://htmlpreview.github.io/?https://github.com/jbonagura/finding_secrets/blob/main/sample_report.html`
 
 ## Tuning the noise
 
