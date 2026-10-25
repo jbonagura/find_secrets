@@ -6,6 +6,12 @@ Fast, low-noise triage of hardcoded secrets, tokens and endpoints in **APK**, **
 
 > **For authorized security testing and research only.** Only scan apps you own or have written permission to assess.
 
+## HTML Report Preview
+
+![finding_secrets HTML report preview](docs/report_preview.svg)
+
+> Generated with `-H report.html` from a fictional app. The full interactive report is in [`sample_report.html`](sample_report.html).
+
 ## Why
 
 A grep for `password`, `token` and `secret` across an APK returns thousands of lines: UI labels, log messages, class names, SDK constants. When the list is that long, nobody reads it, and the real finding hides in the volume.
@@ -117,7 +123,7 @@ https://api.example.com/v1/login?client=android&lang=en
     - res/xml/endpoints.txt
 ```
 
-A full HTML report built from a fictional app is in [`sample_report.html`](sample_report.html). Download it and open it in a browser, or preview it online: `https://htmlpreview.github.io/?https://github.com/jbonagura/finding_secrets/blob/main/sample_report.html`
+A full interactive report built from a fictional app is in [`sample_report.html`](sample_report.html). Download it and open it in a browser, or [preview it online](https://htmlpreview.github.io/?https://github.com/jbonagura/finding_secrets/blob/main/sample_report.html).
 
 ## Tuning the noise
 
@@ -154,13 +160,16 @@ The script exits 0 even when it finds something, so the gate reads the report. S
 
 ## Handling the reports
 
-Reports contain the matched strings, which means they can contain **real secrets** if the scan finds any. Treat them as sensitive and never commit a report from a real app. This repository ignores them by default:
+Reports contain the matched strings, which means they can contain **real secrets** if the scan finds any. Treat them as sensitive and never commit a report from a real app. This repository ignores them by default (see [`.gitignore`](.gitignore)):
 
 ```
 secrets_findings.txt
 urls_found.txt
+report*.txt
 *.html
 !sample_report.html
+*.apk
+*.ipa
 ```
 
 ## Disclaimer
